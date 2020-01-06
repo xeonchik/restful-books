@@ -1,0 +1,15 @@
+{
+  "name": "xeonchik/restful-books",
+  "description": "RESTful application for books storing",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Maxim T.",
+      "email": "xeonchik@gmail.com"
+    }
+  ],
+  "require": {
+    "doctrine/migrations": "~2.2"
+  }
+}

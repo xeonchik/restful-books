@@ -1,0 +1,5 @@
+.vagrant
+.DS_Store
+.bash_history
+.idea
+/vendor/*
