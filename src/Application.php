@@ -31,11 +31,6 @@ class Application
     protected $basePath;
 
     /**
-     * @var EntityManager
-     */
-    protected $doctrine;
-
-    /**
      * @var Container
      */
     protected $container;
@@ -57,6 +52,7 @@ class Application
         }
 
         $this->basePath = $basePath;
+        $this->init();
     }
 
     /**
@@ -73,7 +69,6 @@ class Application
     public function init()
     {
         $this->initContainer();
-        //$this->initDoctrine();
         $this->initRouter();
     }
 
@@ -104,6 +99,11 @@ class Application
         return $data;
     }
 
+    /**
+     * Initializing of container for DI
+     *
+     * @throws \Exception
+     */
     protected function initContainer()
     {
         $container = new Container();
@@ -130,29 +130,58 @@ class Application
         $this->container = $container;
     }
 
+    /**
+     * Initializing of app routes
+     */
     protected function initRouter()
     {
-        $router = new \League\Route\Router();
-        $strategy = (new ApplicationStrategy())->setContainer($this->container);
+        $router = new Router();
+        $strategy = new ApplicationStrategy();
+        $strategy->setContainer($this->container);
         $router->setStrategy($strategy);
 
         $router->group('/api', function (RouteGroup $route) {
-            $route->map('GET', '/contact', 'PhoneBook\Controller\ContactController::index');
+            $route->map('GET', '/contact/{id}', 'PhoneBook\Controller\ContactController::getItem');
+            $route->map('DELETE', '/contact/{id}', 'PhoneBook\Controller\ContactController::deleteItem');
+            $route->map('GET', '/contact-list', 'PhoneBook\Controller\ContactController::getList');
             $route->map('POST', '/contact', 'PhoneBook\Controller\ContactController::createItem');
         });
 
         $this->router = $router;
     }
 
+    /**
+     * @return EntityManagerInterface
+     */
     public function getEntityManager() : EntityManagerInterface
     {
         return $this->container->get('entity_manager');
     }
 
+    /**
+     * @return Container
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+
+    /**
+     * @return Router
+     */
+    public function getRouter(): Router
+    {
+        return $this->router;
+    }
+
+    /**
+     * Start point of app
+     *
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
-        $this->init();
-
         try {
             return $this->router->dispatch($request);
         } catch (NotFoundException $exception) {

@@ -70,17 +70,9 @@ class Contact
     /**
      * @return int
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
-    }
-
-    /**
-     * @param int $id
-     */
-    public function setId(int $id): void
-    {
-        $this->id = $id;
     }
 
     /**
@@ -134,7 +126,7 @@ class Contact
     /**
      * @return string
      */
-    public function getCountryCode(): string
+    public function getCountryCode(): ?string
     {
         return $this->countryCode;
     }
@@ -142,7 +134,7 @@ class Contact
     /**
      * @param string $countryCode
      */
-    public function setCountryCode(string $countryCode): void
+    public function setCountryCode(?string $countryCode): void
     {
         $this->countryCode = $countryCode;
     }
@@ -150,7 +142,7 @@ class Contact
     /**
      * @return string
      */
-    public function getTimeZone(): string
+    public function getTimeZone(): ?string
     {
         return $this->timeZone;
     }
@@ -158,7 +150,7 @@ class Contact
     /**
      * @param string $timeZone
      */
-    public function setTimeZone(string $timeZone): void
+    public function setTimeZone(?string $timeZone): void
     {
         $this->timeZone = $timeZone;
     }
