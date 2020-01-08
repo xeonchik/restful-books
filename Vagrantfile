@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
   # config.vm.network "public_network"
   # config.vm.synced_folder ".", "/vagrant_data"
 
-  config.vm.provision "shell", path: "./scripts/install.sh"
   config.vm.provision "shell", path: "./scripts/php74.sh"
   config.vm.provision "shell", path: "./scripts/mariadb.sh"
+  config.vm.provision "shell", path: "./scripts/install.sh"
 end

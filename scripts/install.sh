@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 apt-get remove apache2
-apt-get install -y nginx
+apt-get install -y nginx composer
 
 #rm -f /etc/nginx/sites-enabled/*
 #rm -f /etc/nginx/sites-available/*
@@ -51,3 +51,6 @@ block="server {
 echo "$block" > "/etc/nginx/sites-available/restful-books.conf"
 ln -fs "/etc/nginx/sites-available/restful-books.conf" "/etc/nginx/sites-enabled/restful-books.conf"
 service nginx restart
+
+cd /vagrant/
+composer install

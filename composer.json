@@ -1,6 +1,6 @@
 {
-  "name": "xeonchik/restful-books",
-  "description": "RESTful application for books storing",
+  "name": "xeonchik/restful-phonebook",
+  "description": "RESTful application for phonebook management",
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
@@ -19,7 +19,7 @@
   },
   "autoload": {
     "psr-4": {
-      "RestfulBooksApp\\": "src/"
+      "PhoneBook\\": "src/"
     }
   },
   "require-dev": {

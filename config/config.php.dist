@@ -1,10 +1,12 @@
 <?php
 
+/* Please modify this file with correct values and rename it to 'config.php' */
+
 return [
     'db' => [
         'driver'   => 'pdo_mysql',
         'user'     => 'homestead',
-        'password' => 'secret',
+        'password' => '',
         'dbname'   => 'restful_books',
     ],
     'entity_paths' => [
