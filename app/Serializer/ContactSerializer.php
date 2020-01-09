@@ -35,7 +35,6 @@ class ContactSerializer
      * @param array $data
      * @param Contact|null $contact
      * @return Contact
-     * @throws \Exception
      */
     public function fromArray(array $data, Contact $contact = null) : Contact
     {

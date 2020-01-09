@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 apt-get remove apache2
-apt-get install -y nginx composer
+apt-get install -y nginx composer redis-server
 
 #rm -f /etc/nginx/sites-enabled/*
 #rm -f /etc/nginx/sites-available/*

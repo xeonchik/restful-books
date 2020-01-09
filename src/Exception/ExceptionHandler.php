@@ -1,7 +1,8 @@
 <?php
 
-namespace AppBase;
+namespace AppBase\Exception;
 
+use AppBase\Application;
 use Laminas\Diactoros\Response\HtmlResponse;
 use League\Route\Http\Exception\NotFoundException;
 use Psr\Http\Message\ResponseInterface;

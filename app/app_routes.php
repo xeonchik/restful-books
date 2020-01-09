@@ -9,7 +9,7 @@ return function (\AppBase\Application $app) {
     $router = $app->getRouter();
 
     /**
-     * This routers for RESTful API of phone book
+     * This routes for RESTful API of phone book
      */
     $router->group('/api', function (RouteGroup $route) {
         $route->map('GET', '/contact/{id}', 'App\Controller\ContactApiController::getItem');

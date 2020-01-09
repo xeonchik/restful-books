@@ -2,6 +2,7 @@
 
 namespace AppBase;
 
+use AppBase\Exception\ExceptionHandler;
 use League\Container\Container;
 use League\Route\Router;
 use League\Route\Strategy\ApplicationStrategy;
@@ -12,7 +13,6 @@ use Psr\Http\Message\ServerRequestInterface;
  * Class Application
  * Base class of application. That will initialize the router, controllers, configs etc...
  *
- * @package PhoneBook
  * @author Maxim Tyuftin <xeonchik@gmail.com>
  */
 class Application
@@ -48,6 +48,11 @@ class Application
      */
     protected $exceptionHandler;
 
+    /**
+     * Application constructor.
+     * @param string|null $basePath Root path
+     * @throws \Exception
+     */
     public function __construct(string $basePath = null)
     {
         if ($basePath === null) {
@@ -84,6 +89,7 @@ class Application
 
     /**
      * Initialize application
+     * @throws \Exception
      */
     public function init()
     {

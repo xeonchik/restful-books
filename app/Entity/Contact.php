@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+//todo: add unique constraints
+
 /**
  * Class Contact
  * @package RestfulBooksApp\Entity

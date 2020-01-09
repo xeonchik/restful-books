@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\ReferenceService;
 use Doctrine\ORM\EntityManager;
 use Laminas\Diactoros\Response\JsonResponse;
 use App\Entity\Contact;
@@ -25,12 +26,19 @@ class ContactApiController
     protected $em;
 
     /**
-     * ContactController constructor.
-     * @param EntityManager $em
+     * @var
      */
-    public function __construct(EntityManager $em)
+    protected $referenceService;
+
+    /**
+     * ContactApiController constructor.
+     * @param EntityManager $em
+     * @param ReferenceService $referenceService
+     */
+    public function __construct(EntityManager $em, ReferenceService $referenceService)
     {
         $this->em = $em;
+        $this->referenceService = $referenceService;
     }
 
     /**
@@ -69,12 +77,18 @@ class ContactApiController
     public function createItem(ServerRequestInterface $request) : ResponseInterface
     {
         $data = json_decode($request->getBody()->getContents());
+        $validator = $this->createContactValidator((array)$data);
+        $valid = $validator->validate();
+
+        if (!$valid) {
+            return new JsonResponse([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 400);
+        }
 
         $serializer = new ContactSerializer();
         $contact = $serializer->fromArray((array)$data);
-
-        // TODO: validation
-        // TODO: validation of country code, timezone
 
         $this->em->persist($contact);
         $this->em->flush();
@@ -109,6 +123,8 @@ class ContactApiController
             );
         }
 
+        $totalCount = $repository->count([]);
+
         // paginate if limit is set
         if ($limit) {
             $qb->setMaxResults($limit);
@@ -124,7 +140,7 @@ class ContactApiController
         $list = $qb->getQuery()->execute();
 
         $result = [
-            'total' => 0, // @todo add total count
+            'total' => $totalCount,
             'items' => []
         ];
         foreach ($list as $item) {
@@ -158,6 +174,16 @@ class ContactApiController
         }
 
         $data = json_decode($request->getBody()->getContents());
+        $validator = $this->createContactValidator((array)$data, false);
+        $valid = $validator->validate();
+
+        if (!$valid) {
+            return new JsonResponse([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
         $serializer = new ContactSerializer();
         $serializer->fromArray((array)$data, $contact);
 
@@ -207,5 +233,39 @@ class ContactApiController
             'success' => false,
             'error' => $errorText
         ], $code);
+    }
+
+    /**
+     * @param array $data
+     * @param bool $checkRequired
+     * @return \Valitron\Validator
+     */
+    protected function createContactValidator(array $data, $checkRequired = true) : \Valitron\Validator
+    {
+        $validator = new \Valitron\Validator($data);
+
+        // Validate required fields if create record
+        if ($checkRequired) {
+            $validator->rule('required', [
+                'first_name',
+                'phone'
+            ]);
+        }
+
+        $validator->rule('lengthMax', ['first_name', 'last_name'], 40);
+        $validator->rule('regex', 'phone', '/^\+[0-9]{1,3} [0-9]{2,3} [0-9]{7}$/')
+            ->message('Phone number is invalid (valid format is +1 123 1234567)');
+
+        $validator->rule(function ($field, $value) {
+            $list = $this->referenceService->getCountries();
+            return isset($list[$value]);
+        }, 'country_code')->message('Country code is not valid (see https://api.hostaway.com/countries)');
+
+        $validator->rule(function ($field, $value) {
+            $list = $this->referenceService->getTimezones();
+            return isset($list[$value]);
+        }, 'timezone')->message('Timezone is not valid (see https://api.hostaway.com/timezones)');
+
+        return $validator;
     }
 }
