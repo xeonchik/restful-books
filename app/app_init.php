@@ -36,8 +36,6 @@ return function (\AppBase\Application $app) {
     $container->add(\App\Service\ReferenceService::class)
         ->addArgument(\AppBase\Cache\CacheWrapper::class);
 
-    // todo: test clean installation: vagrant, etc
-
     // cache factory
     $container->add('cache', function () {
         $config = $this->getConfig()['cache'] ?? null;
