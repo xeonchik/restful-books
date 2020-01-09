@@ -62,7 +62,7 @@ mysql --user="root" -e "CREATE USER IF NOT EXISTS 'homestead'@'0.0.0.0' IDENTIFI
 mysql --user="root" -e "GRANT ALL ON *.* TO 'homestead'@'0.0.0.0' IDENTIFIED BY 'secret' WITH GRANT OPTION;"
 mysql --user="root" -e "GRANT ALL ON *.* TO 'homestead'@'%' IDENTIFIED BY 'secret' WITH GRANT OPTION;"
 mysql --user="root" -e "FLUSH PRIVILEGES;"
-mysql --user="root" -e "CREATE DATABASE restful_books;"
+mysql --user="root" -e "CREATE DATABASE phonebook;"
 service mysql restart
 
 mysql_upgrade --user="root" --verbose --force

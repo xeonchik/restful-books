@@ -8,7 +8,7 @@ apt-get install -y nginx composer redis-server
 
 block="server {
     listen 80;
-    server_name restful-books.dev restful-books.test;
+    server_name restful-phonebook.test;
     root \"/home/vagrant/code/public\";
 
     index index.html index.htm index.php;
@@ -23,7 +23,7 @@ block="server {
     location = /robots.txt  { access_log off; log_not_found off; }
 
     access_log off;
-    error_log  /var/log/nginx/restful-books_error.log error;
+    error_log  /var/log/nginx/restful-phonebook_error.log error;
 
     sendfile off;
 
@@ -48,13 +48,25 @@ block="server {
 }
 "
 
-echo "$block" > "/etc/nginx/sites-available/restful-books.conf"
-ln -fs "/etc/nginx/sites-available/restful-books.conf" "/etc/nginx/sites-enabled/restful-books.conf"
+echo "$block" > "/etc/nginx/sites-available/restful-phonebook.conf"
+ln -fs "/etc/nginx/sites-available/restful-phonebook.conf" "/etc/nginx/sites-enabled/restful-phonebook.conf"
 service nginx restart
 
+# Install redis
+echo "" | pecl install redis
+echo "extension=redis.so" > "/etc/php/7.4/mods-available/redis.ini"
+ln -s /etc/php/7.4/mods-available/redis.ini /etc/php/7.4/fpm/conf.d/20-redis.ini
+ln -s /etc/php/7.4/mods-available/redis.ini /etc/php/7.4/cli/conf.d/20-redis.ini
+
+# Install app
+rm -rf /home/vagrant/code
 cp -R /vagrant/ /home/vagrant/code
 chown -R vagrant:vagrant /home/vagrant/code
 cd /home/vagrant/code
-composer install
+php composer.phar install
 chmod +x /home/vagrant/code/vendor/bin/*
 chmod -R 0777 /home/vagrant/code/var
+
+
+# Load dump into DB
+mysql --user="root" phonebook < /vagrant/db/dump.sql
