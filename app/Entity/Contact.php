@@ -105,7 +105,7 @@ class Contact
     /**
      * @return string
      */
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
