@@ -7,9 +7,7 @@ return [
         'driver'   => 'pdo_mysql',
         'user'     => 'homestead',
         'password' => '',
-        'dbname'   => 'restful_books',
+        'dbname'   => 'phonebook',
     ],
-    'entity_paths' => [
-        '/src/Entity'
-    ]
+    'mode' => 'production'
 ];

@@ -10,4 +10,4 @@
 apt-get -y install software-properties-common
 add-apt-repository -y ppa:ondrej/php
 apt-get update
-apt-get -y install php7.4 php7.4-fpm php7.4-mysql php7.4-curl
+apt-get -y install php7.4 php7.4-fpm php7.4-mysql php7.4-curl php7.4-dev

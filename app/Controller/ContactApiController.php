@@ -83,6 +83,8 @@ class ContactApiController
     }
 
     /**
+     * Get list of contacts (optional with pagination or offset)
+     *
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
@@ -107,36 +109,71 @@ class ContactApiController
             );
         }
 
+        // paginate if limit is set
         if ($limit) {
             $qb->setMaxResults($limit);
-        }
 
-        if ($offset) {
-            $qb->setFirstResult($offset);
-        } else if ($page) {
-            $offset = (abs($page) - 1) * $limit;
-            $qb->setFirstResult($offset);
+            if ($offset) {
+                $qb->setFirstResult($offset);
+            } else if ($page) {
+                $offset = (abs($page) - 1) * $limit;
+                $qb->setFirstResult($offset);
+            }
         }
 
         $list = $qb->getQuery()->execute();
 
-        $result = [];
+        $result = [
+            'total' => 0, // @todo add total count
+            'items' => []
+        ];
         foreach ($list as $item) {
-            $result[] = $serializer->toArray($item);
+            $result['items'][] = $serializer->toArray($item);
         }
 
         return new JsonResponse($result, 200);
     }
 
-    public function updateItem(ServerRequestInterface $request) : ResponseInterface
-    {
-        return new JsonResponse([], 200);
-    }
-
     /**
+     * Update contact item
+     *
      * @param ServerRequestInterface $request
      * @param array $args
      * @return ResponseInterface
+     * @throws NotFoundException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function updateItem(ServerRequestInterface $request, array $args) : ResponseInterface
+    {
+        $id = (int)$args['id'] ?? null;
+
+        // we have a simple logic, therefore we don't need to make a services here
+        $repository = $this->em->getRepository(Contact::class);
+        /** @var Contact|null $contact */
+        $contact = $repository->find($id);
+
+        if (!$contact) {
+            throw new NotFoundException("Contact (ID:$id) not found");
+        }
+
+        $data = json_decode($request->getBody()->getContents());
+        $serializer = new ContactSerializer();
+        $serializer->fromArray((array)$data, $contact);
+
+        $this->em->persist($contact);
+        $this->em->flush();
+
+        return new JsonResponse('', 200);
+    }
+
+    /**
+     * Delete contact item
+     *
+     * @param ServerRequestInterface $request
+     * @param array $args
+     * @return ResponseInterface
+     * @throws NotFoundException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */

@@ -9,7 +9,7 @@ apt-get install -y nginx composer
 block="server {
     listen 80;
     server_name restful-books.dev restful-books.test;
-    root \"/vagrant/public\";
+    root \"/home/vagrant/code/public\";
 
     index index.html index.htm index.php;
 
@@ -52,5 +52,9 @@ echo "$block" > "/etc/nginx/sites-available/restful-books.conf"
 ln -fs "/etc/nginx/sites-available/restful-books.conf" "/etc/nginx/sites-enabled/restful-books.conf"
 service nginx restart
 
-cd /vagrant/
+cp -R /vagrant/ /home/vagrant/code
+chown -R vagrant:vagrant /home/vagrant/code
+cd /home/vagrant/code
 composer install
+chmod +x /home/vagrant/code/vendor/bin/*
+chmod -R 0777 /home/vagrant/code/var

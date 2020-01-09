@@ -2,9 +2,7 @@
 
 namespace AppBase;
 
-use Laminas\Diactoros\Response\JsonResponse;
 use League\Container\Container;
-use League\Route\Http\Exception\NotFoundException;
 use League\Route\Router;
 use League\Route\Strategy\ApplicationStrategy;
 use Psr\Http\Message\ResponseInterface;
@@ -74,6 +72,14 @@ class Application
     public function appDir() : string
     {
         return $this->basePath . '/app';
+    }
+
+    /**
+     * @return string
+     */
+    public function basePath() : string
+    {
+        return $this->basePath;
     }
 
     /**

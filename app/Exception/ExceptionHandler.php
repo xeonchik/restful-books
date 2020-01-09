@@ -16,7 +16,7 @@ class ExceptionHandler extends \AppBase\ExceptionHandler
             return new JsonResponse([
                 'success' => false,
                 'error' => $exception->getMessage()
-            ], $code);
+            ], 404);
         }
 
         return parent::handle($exception, $request);

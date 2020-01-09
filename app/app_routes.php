@@ -14,6 +14,7 @@ return function (\AppBase\Application $app) {
     $router->group('/api', function (RouteGroup $route) {
         $route->map('GET', '/contact/{id}', 'App\Controller\ContactApiController::getItem');
         $route->map('DELETE', '/contact/{id}', 'App\Controller\ContactApiController::deleteItem');
+        $route->map('PUT', '/contact/{id}', 'App\Controller\ContactApiController::updateItem');
         $route->map('GET', '/contact-list', 'App\Controller\ContactApiController::getList');
         $route->map('POST', '/contact', 'App\Controller\ContactApiController::createItem');
     });

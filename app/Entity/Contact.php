@@ -6,8 +6,9 @@ namespace App\Entity;
  * Class Contact
  * @package RestfulBooksApp\Entity
  *
- * @Entity
+ * @Entity()
  * @Table(name="contacts")
+ * @HasLifecycleCallbacks
  */
 class Contact
 {
@@ -64,6 +65,14 @@ class Contact
     public function __construct()
     {
         $this->insertedOn = new \DateTime();
+        $this->updatedOn = new \DateTime();
+    }
+
+    /**
+     * @PreUpdate()
+     */
+    public function preUpdate()
+    {
         $this->updatedOn = new \DateTime();
     }
 
