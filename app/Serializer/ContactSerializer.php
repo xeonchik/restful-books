@@ -1,8 +1,8 @@
 <?php
 
-namespace PhoneBook\Serializer;
+namespace App\Serializer;
 
-use PhoneBook\Entity\Contact;
+use App\Entity\Contact;
 
 /**
  * Class ContactSerializer

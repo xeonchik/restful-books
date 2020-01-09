@@ -1,22 +1,23 @@
 <?php
 
-namespace PhoneBook\Controller;
+namespace App\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Laminas\Diactoros\Response\JsonResponse;
-use PhoneBook\Entity\Contact;
-use PhoneBook\Serializer\ContactSerializer;
+use App\Entity\Contact;
+use App\Exception\NotFoundException;
+use App\Serializer\ContactSerializer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * Class ContactController
+ * Class ContactApiController
  * RESTful API controller to manage phone book items.
  *
- * @package PhoneBook\Controller
+ * @package App\Controller
  * @author Maxim Tyuftin <xeonchik@gmail.com>
  */
-class ContactController
+class ContactApiController
 {
     /**
      * @var EntityManager
@@ -50,7 +51,7 @@ class ContactController
         $contact = $repository->find($id);
 
         if (!$contact) {
-            return $this->errorResponse("Contact (ID:$id) not found", 404);
+            throw new NotFoundException("Contact (ID:$id) not found");
         }
 
         $serializer = new ContactSerializer();
@@ -112,6 +113,9 @@ class ContactController
 
         if ($offset) {
             $qb->setFirstResult($offset);
+        } else if ($page) {
+            $offset = (abs($page) - 1) * $limit;
+            $qb->setFirstResult($offset);
         }
 
         $list = $qb->getQuery()->execute();
@@ -144,13 +148,13 @@ class ContactController
         $contact = $repository->find($id);
 
         if (!$contact) {
-            return $this->errorResponse("Contact (ID:$id) not found", 404);
+            throw new NotFoundException("Contact (ID:$id) not found");
         }
 
         $this->em->remove($contact);
         $this->em->flush();
 
-        return new JsonResponse([], 200);
+        return new JsonResponse('', 200);
     }
 
     /**

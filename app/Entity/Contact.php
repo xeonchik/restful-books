@@ -1,6 +1,6 @@
 <?php
 
-namespace PhoneBook\Entity;
+namespace App\Entity;
 
 /**
  * Class Contact

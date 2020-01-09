@@ -1,23 +1,18 @@
 <?php
 
-namespace PhoneBook;
+namespace AppBase;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use League\Container\Container;
 use League\Route\Http\Exception\NotFoundException;
-use League\Route\RouteGroup;
 use League\Route\Router;
 use League\Route\Strategy\ApplicationStrategy;
-use PhoneBook\Controller\ContactController;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Doctrine\ORM\Tools\Setup;
-use Doctrine\ORM\EntityManager;
 
 /**
  * Class Application
- * Main class of our minimalistic application. That will initialize the router, controllers, configs etc...
+ * Base class of application. That will initialize the router, controllers, configs etc...
  *
  * @package PhoneBook
  * @author Maxim Tyuftin <xeonchik@gmail.com>
@@ -45,6 +40,16 @@ class Application
      */
     protected $config = null;
 
+    /**
+     * @var string
+     */
+    protected string $mode = 'production';
+
+    /**
+     * @var ExceptionHandler
+     */
+    protected $exceptionHandler;
+
     public function __construct(string $basePath = null)
     {
         if ($basePath === null) {
@@ -64,12 +69,64 @@ class Application
     }
 
     /**
+     * @return string
+     */
+    public function appDir() : string
+    {
+        return $this->basePath . '/app';
+    }
+
+    /**
      * Initialize application
      */
     public function init()
     {
         $this->initContainer();
         $this->initRouter();
+
+        $this->mode = $this->getConfig()['mode'] ?? 'production';
+
+        // init default error handler
+        $this->exceptionHandler = new ExceptionHandler($this);
+
+        // init app, containers
+        if (file_exists($this->appDir() . '/app_init.php')) {
+            $initFunction = include $this->appDir() . '/app_init.php';
+            if (is_callable($initFunction)) {
+                $initFunction($this);
+            }
+        }
+    }
+
+    /**
+     * Initializing of container for DI
+     *
+     * @throws \Exception
+     */
+    protected function initContainer()
+    {
+        $container = new Container();
+        $this->container = $container;
+    }
+
+    /**
+     * Initializing of app routes
+     */
+    protected function initRouter()
+    {
+        $router = new Router();
+        $strategy = new ApplicationStrategy();
+        $strategy->setContainer($this->container);
+        $router->setStrategy($strategy);
+        $this->router = $router;
+
+        // attach routes from app
+        if (file_exists($this->appDir() . '/app_routes.php')) {
+            $routesFunction = include $this->appDir() . '/app_routes.php';
+            if (is_callable($routesFunction)) {
+                $routesFunction($this);
+            }
+        }
     }
 
     /**
@@ -100,65 +157,6 @@ class Application
     }
 
     /**
-     * Initializing of container for DI
-     *
-     * @throws \Exception
-     */
-    protected function initContainer()
-    {
-        $container = new Container();
-        $config = $this->getConfig();
-
-        $container->add('entity_manager', function () use ($config) {
-            $paths = [];
-
-            if (isset($config['entity_paths'])) {
-                foreach ($config['entity_paths'] as $path) {
-                    $paths[] = $this->basePath . $path;
-                }
-            }
-
-            $isDevMode = false;
-            $setup = Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
-            $em = EntityManager::create($config['db'], $setup);
-            return $em;
-        });
-
-        $container->add(ContactController::class)
-            ->addArgument('entity_manager');
-
-        $this->container = $container;
-    }
-
-    /**
-     * Initializing of app routes
-     */
-    protected function initRouter()
-    {
-        $router = new Router();
-        $strategy = new ApplicationStrategy();
-        $strategy->setContainer($this->container);
-        $router->setStrategy($strategy);
-
-        $router->group('/api', function (RouteGroup $route) {
-            $route->map('GET', '/contact/{id}', 'PhoneBook\Controller\ContactController::getItem');
-            $route->map('DELETE', '/contact/{id}', 'PhoneBook\Controller\ContactController::deleteItem');
-            $route->map('GET', '/contact-list', 'PhoneBook\Controller\ContactController::getList');
-            $route->map('POST', '/contact', 'PhoneBook\Controller\ContactController::createItem');
-        });
-
-        $this->router = $router;
-    }
-
-    /**
-     * @return EntityManagerInterface
-     */
-    public function getEntityManager() : EntityManagerInterface
-    {
-        return $this->container->get('entity_manager');
-    }
-
-    /**
      * @return Container
      */
     public function getContainer(): Container
@@ -175,6 +173,22 @@ class Application
     }
 
     /**
+     * @return ExceptionHandler
+     */
+    public function getExceptionHandler(): ExceptionHandler
+    {
+        return $this->exceptionHandler;
+    }
+
+    /**
+     * @param ExceptionHandler $exceptionHandler
+     */
+    public function setExceptionHandler(ExceptionHandler $exceptionHandler): void
+    {
+        $this->exceptionHandler = $exceptionHandler;
+    }
+
+    /**
      * Start point of app
      *
      * @param ServerRequestInterface $request
@@ -184,10 +198,16 @@ class Application
     {
         try {
             return $this->router->dispatch($request);
-        } catch (NotFoundException $exception) {
-            return new JsonResponse([ 'Route for request ' . $request->getMethod() . ':' . $request->getUri()->getPath() . ' not found' ], 404);
-        } catch (\Exception $exception) {
-            return new JsonResponse([ 'Internal error: ' . $exception->getMessage() ], 500);
+        } catch (\Exception $e) {
+            return $this->exceptionHandler->handle($e, $request);
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDebug()
+    {
+        return $this->mode == 'dev' ? true : false;
     }
 }

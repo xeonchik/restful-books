@@ -7,7 +7,5 @@ return [
         'password' => 'secret',
         'dbname'   => 'phonebook',
     ],
-    'entity_paths' => [
-        '/src/Entity'
-    ]
+    'mode' => 'dev'
 ];
