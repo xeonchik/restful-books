@@ -57,7 +57,7 @@ echo "" | pecl install redis
 echo "extension=redis.so" > "/etc/php/7.4/mods-available/redis.ini"
 ln -s /etc/php/7.4/mods-available/redis.ini /etc/php/7.4/fpm/conf.d/20-redis.ini
 ln -s /etc/php/7.4/mods-available/redis.ini /etc/php/7.4/cli/conf.d/20-redis.ini
-service php7.4 restart
+service php7.4-fpm restart
 
 # Install app
 rm -rf /home/vagrant/code
